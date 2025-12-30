@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { fetchProducts } from "@/lib/api";
+import Link from 'next/link';
+import { fetchProducts } from '@/lib/api';
 import {
   Card,
   CardContent,
@@ -7,11 +7,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart } from "lucide-react";
-import { Product } from "@/types";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart } from 'lucide-react';
+import { Product } from '@/types';
 
 /**
  * Home page - Product listing
@@ -21,16 +21,14 @@ export default async function HomePage() {
   try {
     products = await fetchProducts();
   } catch (error) {
-    console.error("Failed to fetch products:", error);
+    console.error('Failed to fetch products:', error);
   }
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Products</h1>
-        <p className="text-muted-foreground">
-          Browse our selection of products
-        </p>
+        <p className="text-muted-foreground">Browse our selection of products</p>
       </div>
 
       {products.length === 0 ? (
@@ -44,23 +42,19 @@ export default async function HomePage() {
               <CardHeader>
                 <CardTitle className="line-clamp-2">{product.name}</CardTitle>
                 <CardDescription className="line-clamp-2">
-                  {product.description || "No description available"}
+                  {product.description || 'No description available'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-2xl font-bold">
-                    ${product.price.toFixed(2)}
-                  </span>
+                  <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
                   {product.stock > 0 ? (
                     <Badge variant="default">In Stock</Badge>
                   ) : (
                     <Badge variant="destructive">Out of Stock</Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Stock: {product.stock}
-                </p>
+                <p className="text-sm text-muted-foreground">Stock: {product.stock}</p>
               </CardContent>
               <CardFooter>
                 <Link href={`/products/${product.id}`} className="w-full">

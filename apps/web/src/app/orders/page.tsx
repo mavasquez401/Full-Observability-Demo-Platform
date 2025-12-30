@@ -1,17 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { fetchOrders } from "@/lib/api";
-import { Order } from "@/types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Package, CheckCircle, Clock, XCircle } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { fetchOrders } from '@/lib/api';
+import { Order } from '@/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Package, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 /**
  * Orders page - Display order history
@@ -23,10 +17,10 @@ export default function OrdersPage() {
   useEffect(() => {
     async function loadOrders() {
       try {
-        const data = await fetchOrders("demo-user");
+        const data = await fetchOrders('demo-user');
         setOrders(data);
       } catch (error) {
-        console.error("Failed to load orders:", error);
+        console.error('Failed to load orders:', error);
       } finally {
         setLoading(false);
       }
@@ -36,27 +30,25 @@ export default function OrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "completed":
+      case 'completed':
         return <CheckCircle className="h-4 w-4" />;
-      case "processing":
+      case 'processing':
         return <Clock className="h-4 w-4" />;
-      case "failed":
+      case 'failed':
         return <XCircle className="h-4 w-4" />;
       default:
         return <Package className="h-4 w-4" />;
     }
   };
 
-  const getStatusVariant = (
-    status: string,
-  ): "default" | "secondary" | "destructive" => {
+  const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' => {
     switch (status) {
-      case "completed":
-        return "default";
-      case "failed":
-        return "destructive";
+      case 'completed':
+        return 'default';
+      case 'failed':
+        return 'destructive';
       default:
-        return "secondary";
+        return 'secondary';
     }
   };
 
@@ -88,8 +80,7 @@ export default function OrdersPage() {
                       <span>Order #{order.id}</span>
                     </CardTitle>
                     <CardDescription>
-                      Placed on{" "}
-                      {new Date(order.created_at).toLocaleDateString()}
+                      Placed on {new Date(order.created_at).toLocaleDateString()}
                     </CardDescription>
                   </div>
                   <Badge
@@ -107,14 +98,12 @@ export default function OrdersPage() {
                     {order.items && order.items.length > 0 && (
                       <p className="text-sm text-muted-foreground">
                         {order.items.length} item
-                        {order.items.length !== 1 ? "s" : ""}
+                        {order.items.length !== 1 ? 's' : ''}
                       </p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold">
-                      ${order.total_amount.toFixed(2)}
-                    </p>
+                    <p className="text-2xl font-bold">${order.total_amount.toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>

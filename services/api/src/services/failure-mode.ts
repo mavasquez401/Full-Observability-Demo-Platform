@@ -42,9 +42,7 @@ export function getFailureMode(): FailureConfig {
  */
 export async function applyLatency(): Promise<void> {
   if (failureConfig.latencyMs > 0) {
-    await new Promise((resolve) =>
-      setTimeout(resolve, failureConfig.latencyMs),
-    );
+    await new Promise((resolve) => setTimeout(resolve, failureConfig.latencyMs));
   }
 }
 
@@ -64,9 +62,7 @@ export function shouldInjectError(): boolean {
 export async function applyDbStress<T>(fn: () => Promise<T>): Promise<T> {
   if (failureConfig.dbStress) {
     // Simulate slow query by adding delay
-    await new Promise((resolve) =>
-      setTimeout(resolve, 500 + Math.random() * 1000),
-    );
+    await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 1000));
   }
   return fn();
 }

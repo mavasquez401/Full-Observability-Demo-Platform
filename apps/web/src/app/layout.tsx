@@ -1,22 +1,18 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Link from "next/link";
-import { ShoppingCart, Package, Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import Link from 'next/link';
+import { ShoppingCart, Package, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Observability Demo Platform",
-  description: "Full Observability Demo Platform for Datadog SE demos",
+  title: 'Observability Demo Platform',
+  description: 'Full Observability Demo Platform for Datadog SE demos',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>

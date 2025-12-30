@@ -15,7 +15,7 @@ export interface Product {
 export interface Order {
   id: number;
   user_id: string;
-  status: "pending" | "processing" | "completed" | "failed";
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   total_amount: number;
   created_at: Date;
   updated_at: Date;
@@ -34,7 +34,7 @@ export interface Job {
   id: number;
   order_id: number | null;
   job_type: string;
-  status: "pending" | "processing" | "completed" | "failed";
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   payload: Record<string, unknown>;
   result: Record<string, unknown> | null;
   error_message: string | null;

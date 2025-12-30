@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { fetchProduct, checkout } from "@/lib/api";
-import { Product } from "@/types";
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { fetchProduct, checkout } from '@/lib/api';
+import { Product } from '@/types';
 import {
   Card,
   CardContent,
@@ -11,11 +11,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, ArrowLeft, Check } from "lucide-react";
-import Link from "next/link";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, ArrowLeft, Check } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * Product detail page
@@ -37,7 +37,7 @@ export default function ProductPage() {
         const data = await fetchProduct(productId);
         setProduct(data);
       } catch (error) {
-        console.error("Failed to load product:", error);
+        console.error('Failed to load product:', error);
       } finally {
         setLoading(false);
       }
@@ -52,7 +52,7 @@ export default function ProductPage() {
     try {
       // For demo, we'll directly checkout with this single product
       await checkout({
-        user_id: "demo-user",
+        user_id: 'demo-user',
         items: [
           {
             product_id: product.id,
@@ -62,10 +62,11 @@ export default function ProductPage() {
       });
       setAdded(true);
       setTimeout(() => {
-        router.push("/orders");
+        router.push('/orders');
       }, 1500);
-    } catch (error: any) {
-      alert(error.message || "Failed to add to cart");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to add to cart';
+      alert(message);
     } finally {
       setAdding(false);
     }
@@ -106,24 +107,18 @@ export default function ProductPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{product.name}</CardTitle>
-            <CardDescription>
-              {product.description || "No description available"}
-            </CardDescription>
+            <CardDescription>{product.description || 'No description available'}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-4xl font-bold">
-                ${product.price.toFixed(2)}
-              </span>
+              <span className="text-4xl font-bold">${product.price.toFixed(2)}</span>
               {product.stock > 0 ? (
                 <Badge variant="default">In Stock</Badge>
               ) : (
                 <Badge variant="destructive">Out of Stock</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Stock available: {product.stock}
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Stock available: {product.stock}</p>
           </CardContent>
         </Card>
 
@@ -134,9 +129,7 @@ export default function ProductPage() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Quantity
-                </label>
+                <label className="text-sm font-medium mb-2 block">Quantity</label>
                 <div className="flex items-center space-x-4">
                   <Button
                     variant="outline"
@@ -146,15 +139,11 @@ export default function ProductPage() {
                   >
                     -
                   </Button>
-                  <span className="text-lg font-semibold w-12 text-center">
-                    {quantity}
-                  </span>
+                  <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() =>
-                      setQuantity(Math.min(product.stock, quantity + 1))
-                    }
+                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                     disabled={quantity >= product.stock}
                   >
                     +
@@ -186,7 +175,7 @@ export default function ProductPage() {
               ) : (
                 <>
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  {adding ? "Processing..." : "Add to Cart & Checkout"}
+                  {adding ? 'Processing...' : 'Add to Cart & Checkout'}
                 </>
               )}
             </Button>
