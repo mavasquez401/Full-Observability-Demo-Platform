@@ -40,7 +40,7 @@ const server = Fastify({
 
 // Add trace correlation to logs using OpenTelemetry context
 server.addHook('onRequest', async (request) => {
-  const { trace, context } = await import('@opentelemetry/api');
+  const { trace } = await import('@opentelemetry/api');
   const activeSpan = trace.getActiveSpan();
   if (activeSpan) {
     const spanContext = activeSpan.spanContext();

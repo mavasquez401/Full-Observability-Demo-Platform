@@ -23,7 +23,7 @@ redisClient.connect().catch((err) => {
  * Enqueue a job to the Celery queue
  * Jobs are serialized as JSON and added to the Redis queue
  */
-export async function enqueueJob(jobType: string, payload: any): Promise<void> {
+export async function enqueueJob(jobType: string, payload: Record<string, unknown>): Promise<void> {
   try {
     // Celery task format: simple JSON serialization for demo
     // In production, you'd use proper Celery serialization

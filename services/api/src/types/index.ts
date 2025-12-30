@@ -35,8 +35,8 @@ export interface Job {
   order_id: number | null;
   job_type: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  payload: any;
-  result: any | null;
+  payload: Record<string, unknown>;
+  result: Record<string, unknown> | null;
   error_message: string | null;
   created_at: Date;
   updated_at: Date;

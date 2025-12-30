@@ -24,15 +24,14 @@ pool.on('error', (err) => {
 /**
  * Execute a query with the connection pool
  */
-export const query = async (text: string, params?: any[]) => {
+export const query = async (text: string, params?: unknown[]) => {
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
     return res;
   } catch (error) {
-    const duration = Date.now() - start;
-    console.error('Database query error', { text, duration, error });
+    console.error('Database query error', { text, duration: Date.now() - start, error });
     throw error;
   }
 };

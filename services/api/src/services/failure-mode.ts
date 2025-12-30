@@ -9,11 +9,11 @@ interface FailureConfig {
   dbStress: boolean;
 }
 
-let failureConfig: FailureConfig = {
+const failureConfig = {
   latencyMs: 0,
   errorRate: 0,
   dbStress: false,
-};
+} as FailureConfig;
 
 /**
  * Set failure mode configuration

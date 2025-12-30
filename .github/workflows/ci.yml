@@ -55,10 +55,16 @@ jobs:
           python-version: '3.11'
       - name: Install Poetry
         uses: snok/install-poetry@v1
+      - name: Generate lock file if needed
+        run: |
+          cd services/worker
+          if [ ! -f poetry.lock ]; then
+            poetry lock --no-interaction --no-ansi
+          fi
       - name: Install dependencies
         run: |
           cd services/worker
-          poetry install --no-interaction --no-ansi || poetry lock --no-update && poetry install --no-interaction --no-ansi
+          poetry install --no-interaction --no-ansi
       - name: Lint with ruff
         run: |
           cd services/worker
@@ -74,10 +80,16 @@ jobs:
           python-version: '3.11'
       - name: Install Poetry
         uses: snok/install-poetry@v1
+      - name: Generate lock file if needed
+        run: |
+          cd services/worker
+          if [ ! -f poetry.lock ]; then
+            poetry lock --no-interaction --no-ansi
+          fi
       - name: Install dependencies
         run: |
           cd services/worker
-          poetry install --no-interaction --no-ansi || poetry lock --no-update && poetry install --no-interaction --no-ansi
+          poetry install --no-interaction --no-ansi
       - name: Check formatting with black
         run: |
           cd services/worker

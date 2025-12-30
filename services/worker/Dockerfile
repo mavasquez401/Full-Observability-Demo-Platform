@@ -12,10 +12,11 @@ RUN apt-get update && apt-get install -y \
 RUN pip install poetry
 
 # Copy Poetry files
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml ./
 
-# Install dependencies
+# Generate lock file if not present, then install dependencies
 RUN poetry config virtualenvs.create false && \
+    (poetry lock --no-interaction --no-ansi || true) && \
     poetry install --no-interaction --no-ansi
 
 # Copy application code
