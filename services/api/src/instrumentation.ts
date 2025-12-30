@@ -12,6 +12,7 @@ import {
   SEMRESATTRS_SERVICE_VERSION,
 } from "@opentelemetry/semantic-conventions";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 
 /**
  * Initialize OpenTelemetry SDK
@@ -47,7 +48,7 @@ export function initializeTelemetry(): void {
   // Initialize SDK
   const sdk = new NodeSDK({
     resource,
-    traceExporter,
+    spanProcessor: new BatchSpanProcessor(traceExporter),
     metricReader: new PeriodicExportingMetricReader({
       exporter: metricExporter,
       exportIntervalMillis: 10000, // Export metrics every 10 seconds
