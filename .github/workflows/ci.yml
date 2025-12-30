@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  lint-typescript:
+    name: Lint TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint web
+        run: |
+          cd apps/web
+          npm ci
+          npm run lint
+      - name: Lint API
+        run: |
+          cd services/api
+          npm ci
+          npm run lint
+
+  format-typescript:
+    name: Format TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Check formatting
+        run: |
+          cd apps/web && npm ci && npm run format:check
+          cd ../../services/api && npm ci && npm run format:check
+
+  lint-python:
+    name: Lint Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Install dependencies
+        run: |
+          cd services/worker
+          poetry install
+      - name: Lint with ruff
+        run: |
+          cd services/worker
+          poetry run ruff check .
+
+  format-python:
+    name: Format Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Install dependencies
+        run: |
+          cd services/worker
+          poetry install
+      - name: Check formatting with black
+        run: |
+          cd services/worker
+          poetry run black --check .
+
+  build:
+    name: Build Services
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Build web
+        run: |
+          cd apps/web
+          npm ci
+          npm run build
+      - name: Build API
+        run: |
+          cd services/api
+          npm ci
+          npm run build
+

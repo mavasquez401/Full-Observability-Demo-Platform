@@ -1,0 +1,67 @@
+# OpenTelemetry Collector configuration
+# Receives OTLP from services and exports to Datadog Agent
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Batch processor for better performance
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+  # Resource processor to add/enhance resource attributes
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: ${DD_ENV}
+        action: upsert
+      - key: service.version
+        from_attribute: service.version
+        action: upsert
+      - key: customer_tier
+        from_attribute: customer_tier
+        action: upsert
+      - key: region
+        from_attribute: region
+        action: upsert
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
+
+exporters:
+  # Export to Datadog Agent via OTLP
+  otlp/datadog:
+    endpoint: datadog-agent:4317
+    tls:
+      insecure: true
+
+  # Logging exporter for debugging (can be removed in production)
+  logging:
+    loglevel: info
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp/datadog, logging]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp/datadog, logging]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp/datadog, logging]
+

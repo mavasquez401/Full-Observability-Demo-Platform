@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: observability-demo-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-observability_demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-observability_demo_password}
+      POSTGRES_DB: ${POSTGRES_DB:-observability_demo}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-observability_demo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - observability-network
+
+  # Redis Cache/Queue
+  redis:
+    image: redis:7-alpine
+    container_name: observability-demo-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - observability-network
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: observability-demo-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ../otel/collector/otel-collector.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+    depends_on:
+      - datadog-agent
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - observability-network
+
+  # Datadog Agent
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: observability-demo-datadog-agent
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_SITE=${DD_SITE:-datadoghq.com}
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_CONTAINER_EXCLUDE="name:datadog-agent"
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+      - DD_PROCESS_AGENT_ENABLED=true
+      - DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT=0.0.0.0:4317
+      - DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT=0.0.0.0:4318
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    ports:
+      - "8126:8126" # APM
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    healthcheck:
+      test: ["CMD-SHELL", "agent health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - observability-network
+
+  # API Service (Fastify + TypeScript)
+  api:
+    build:
+      context: ../../services/api
+      dockerfile: Dockerfile
+    container_name: observability-demo-api
+    environment:
+      # Service identity
+      - DD_SERVICE=api
+      - DD_ENV=${DD_ENV:-demo}
+      - DD_VERSION=${API_VERSION:-1.0.0}
+      - CUSTOMER_TIER=${CUSTOMER_TIER:-premium}
+      - REGION=${REGION:-us-east-1}
+      # Database
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-observability_demo}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-observability_demo_password}
+      - POSTGRES_DB=${POSTGRES_DB:-observability_demo}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-observability_demo}:${POSTGRES_PASSWORD:-observability_demo_password}@postgres:5432/${POSTGRES_DB:-observability_demo}
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379
+      # API config
+      - PORT=3001
+      - HOST=0.0.0.0
+      # OpenTelemetry
+      - OTEL_SERVICE_NAME=api
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=api,deployment.environment=${DD_ENV:-demo},service.version=${API_VERSION:-1.0.0},customer_tier=${CUSTOMER_TIER:-premium},region=${REGION:-us-east-1}
+      # Datadog
+      - DD_AGENT_HOST=datadog-agent
+      - DD_TRACE_AGENT_PORT=8126
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_healthy
+      datadog-agent:
+        condition: service_healthy
+    networks:
+      - observability-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Worker Service (Python + Celery)
+  worker:
+    build:
+      context: ../../services/worker
+      dockerfile: Dockerfile
+    container_name: observability-demo-worker
+    environment:
+      # Service identity
+      - DD_SERVICE=worker
+      - DD_ENV=${DD_ENV:-demo}
+      - DD_VERSION=${WORKER_VERSION:-1.0.0}
+      - CUSTOMER_TIER=${CUSTOMER_TIER:-premium}
+      - REGION=${REGION:-us-east-1}
+      # Database
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-observability_demo}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-observability_demo_password}
+      - POSTGRES_DB=${POSTGRES_DB:-observability_demo}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-observability_demo}:${POSTGRES_PASSWORD:-observability_demo_password}@postgres:5432/${POSTGRES_DB:-observability_demo}
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      # OpenTelemetry
+      - OTEL_SERVICE_NAME=worker
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=worker,deployment.environment=${DD_ENV:-demo},service.version=${WORKER_VERSION:-1.0.0},customer_tier=${CUSTOMER_TIER:-premium},region=${REGION:-us-east-1}
+      # Failure modes
+      - SLOW_CONSUMER=false
+      # Datadog
+      - DD_AGENT_HOST=datadog-agent
+      - DD_TRACE_AGENT_PORT=8126
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_healthy
+      datadog-agent:
+        condition: service_healthy
+    networks:
+      - observability-network
+    command: celery -A app.celery_app worker --loglevel=info --concurrency=2
+
+  # Web Service (Next.js)
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    container_name: observability-demo-web
+    environment:
+      # Service identity
+      - DD_SERVICE=web
+      - DD_ENV=${DD_ENV:-demo}
+      - DD_VERSION=${WEB_VERSION:-1.0.0}
+      - CUSTOMER_TIER=${CUSTOMER_TIER:-premium}
+      - REGION=${REGION:-us-east-1}
+      # API URL
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_APP_ENV=${DD_ENV:-demo}
+      # OpenTelemetry
+      - OTEL_SERVICE_NAME=web
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=web,deployment.environment=${DD_ENV:-demo},service.version=${WEB_VERSION:-1.0.0},customer_tier=${CUSTOMER_TIER:-premium},region=${REGION:-us-east-1}
+      # Datadog
+      - DD_AGENT_HOST=datadog-agent
+      - DD_TRACE_AGENT_PORT=8126
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+      - otel-collector
+      - datadog-agent
+    networks:
+      - observability-network
+
+networks:
+  observability-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
