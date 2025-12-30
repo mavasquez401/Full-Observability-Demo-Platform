@@ -1,9 +1,9 @@
 """
 PostgreSQL database connection pool
 """
+
 import os
 import psycopg2
-from psycopg2 import pool
 import structlog
 
 logger = structlog.get_logger(__name__)

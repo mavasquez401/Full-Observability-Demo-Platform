@@ -2,6 +2,7 @@
 Order receipt task
 Generates and processes order receipt emails
 """
+
 import time
 import os
 import json

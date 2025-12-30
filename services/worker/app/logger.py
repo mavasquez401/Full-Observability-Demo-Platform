@@ -2,10 +2,8 @@
 Structured logging configuration
 Uses structlog for JSON logging with trace correlation
 """
+
 import structlog
-import sys
-import json
-from typing import Any
 
 
 def add_trace_context(logger, method_name, event_dict):

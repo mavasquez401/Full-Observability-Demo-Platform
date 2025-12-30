@@ -2,6 +2,7 @@
 OpenTelemetry instrumentation setup for Python worker
 Configures tracing and metrics for Celery tasks
 """
+
 import os
 from opentelemetry import trace, metrics
 from opentelemetry.sdk.trace import TracerProvider

@@ -1,13 +1,14 @@
 """
 Celery application configuration
 """
+
 # Initialize OpenTelemetry FIRST
 from app.instrumentation import initialize_telemetry
 
 initialize_telemetry()
 
-from celery import Celery
-import os
+from celery import Celery  # noqa: E402 - must init telemetry first
+import os  # noqa: E402
 
 # Create Celery instance
 celery_app = Celery(
