@@ -4,6 +4,7 @@ version = "1.0.0"
 description = "Celery worker service for Observability Demo Platform"
 authors = ["Observability Demo Team"]
 readme = "README.md"
+package-mode = false  # Only using Poetry for dependency management, not packaging
 
 [tool.poetry.dependencies]
 python = "^3.11"
