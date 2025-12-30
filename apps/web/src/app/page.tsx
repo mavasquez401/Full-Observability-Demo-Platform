@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart } from 'lucide-react';
+import { Product } from '@/types';
 
 /**
  * Home page - Product listing
  */
 export default async function HomePage() {
-  let products = [];
+  let products: Product[] = [];
   try {
     products = await fetchProducts();
   } catch (error) {
