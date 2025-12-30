@@ -1,14 +1,14 @@
 // Initialize OpenTelemetry FIRST, before any other imports
-import { initializeTelemetry } from './instrumentation';
+import { initializeTelemetry } from "./instrumentation";
 initializeTelemetry();
 
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import helmet from '@fastify/helmet';
-import productsRoutes from './routes/products';
-import ordersRoutes from './routes/orders';
-import adminRoutes from './routes/admin';
-import query from './db/client';
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
+import productsRoutes from "./routes/products";
+import ordersRoutes from "./routes/orders";
+import adminRoutes from "./routes/admin";
+import query from "./db/client";
 
 /**
  * Fastify API server
@@ -17,7 +17,7 @@ import query from './db/client';
 
 const server = Fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || "info",
     serializers: {
       req: (req) => ({
         method: req.method,
@@ -26,12 +26,12 @@ const server = Fastify({
       }),
     },
     transport:
-      process.env.NODE_ENV === 'development'
+      process.env.NODE_ENV === "development"
         ? {
-            target: 'pino-pretty',
+            target: "pino-pretty",
             options: {
-              translateTime: 'HH:MM:ss Z',
-              ignore: 'pid,hostname',
+              translateTime: "HH:MM:ss Z",
+              ignore: "pid,hostname",
             },
           }
         : undefined,
@@ -39,8 +39,8 @@ const server = Fastify({
 });
 
 // Add trace correlation to logs using OpenTelemetry context
-server.addHook('onRequest', async (request) => {
-  const { trace } = await import('@opentelemetry/api');
+server.addHook("onRequest", async (request) => {
+  const { trace } = await import("@opentelemetry/api");
   const activeSpan = trace.getActiveSpan();
   if (activeSpan) {
     const spanContext = activeSpan.spanContext();
@@ -60,27 +60,27 @@ server.register(cors, {
 });
 
 // Health check endpoint
-server.get('/health', async () => {
+server.get("/health", async () => {
   try {
     // Check database connection
-    await query('SELECT 1');
-    return { status: 'healthy', service: 'api' };
+    await query("SELECT 1");
+    return { status: "healthy", service: "api" };
   } catch (error) {
-    server.log.error(error, 'Health check failed');
-    return { status: 'unhealthy', service: 'api' };
+    server.log.error(error, "Health check failed");
+    return { status: "unhealthy", service: "api" };
   }
 });
 
 // Register routes
 server.register(productsRoutes);
 server.register(ordersRoutes);
-server.register(adminRoutes, { prefix: '/admin' });
+server.register(adminRoutes, { prefix: "/admin" });
 
 // Start server
 const start = async () => {
   try {
-    const port = parseInt(process.env.PORT || '3001', 10);
-    const host = process.env.HOST || '0.0.0.0';
+    const port = parseInt(process.env.PORT || "3001", 10);
+    const host = process.env.HOST || "0.0.0.0";
 
     await server.listen({ port, host });
     server.log.info(`API server listening on ${host}:${port}`);
@@ -91,4 +91,3 @@ const start = async () => {
 };
 
 start();
-

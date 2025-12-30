@@ -1,4 +1,3 @@
 """
 Database connection and utilities
 """
-

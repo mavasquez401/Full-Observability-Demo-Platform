@@ -1,6 +1,6 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import query from './client';
+import { readFileSync } from "fs";
+import { join } from "path";
+import query from "./client";
 
 /**
  * Seed database with sample data
@@ -8,18 +8,18 @@ import query from './client';
  */
 async function seed() {
   try {
-    console.log('Seeding database with sample data...');
+    console.log("Seeding database with sample data...");
 
     // Read and execute seed file
-    const seedPath = join(__dirname, 'seeds', '001_sample_data.sql');
-    const seedSQL = readFileSync(seedPath, 'utf-8');
+    const seedPath = join(__dirname, "seeds", "001_sample_data.sql");
+    const seedSQL = readFileSync(seedPath, "utf-8");
 
     await query(seedSQL);
-    console.log('✅ Seeding completed successfully');
+    console.log("✅ Seeding completed successfully");
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    console.error("❌ Seeding failed:", error);
     // Don't exit on seed errors (data might already exist)
-    console.log('Continuing anyway...');
+    console.log("Continuing anyway...");
   }
 }
 
@@ -36,4 +36,3 @@ if (require.main === module) {
 }
 
 export default seed;
-

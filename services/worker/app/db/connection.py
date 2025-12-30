@@ -18,8 +18,8 @@ def get_connection_pool():
 
     if _connection_pool is None:
         database_url = os.getenv(
-            'DATABASE_URL',
-            'postgresql://observability_demo:observability_demo_password@localhost:5432/observability_demo',
+            "DATABASE_URL",
+            "postgresql://observability_demo:observability_demo_password@localhost:5432/observability_demo",
         )
 
         try:
@@ -28,9 +28,9 @@ def get_connection_pool():
                 20,  # Maximum connections
                 database_url,
             )
-            logger.info('Database connection pool created')
+            logger.info("Database connection pool created")
         except Exception as e:
-            logger.error('Failed to create database connection pool', error=str(e))
+            logger.error("Failed to create database connection pool", error=str(e))
             raise
 
     return _connection_pool
@@ -60,7 +60,7 @@ def execute_query(query, params=None):
         return result
     except Exception as e:
         conn.rollback()
-        logger.error('Query execution failed', query=query, error=str(e))
+        logger.error("Query execution failed", query=query, error=str(e))
         raise
     finally:
         return_connection(conn)
@@ -76,8 +76,7 @@ def execute_update(query, params=None):
         cursor.close()
     except Exception as e:
         conn.rollback()
-        logger.error('Update execution failed', query=query, error=str(e))
+        logger.error("Update execution failed", query=query, error=str(e))
         raise
     finally:
         return_connection(conn)
-

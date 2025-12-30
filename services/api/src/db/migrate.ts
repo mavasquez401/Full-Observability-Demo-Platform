@@ -1,6 +1,6 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import query from './client';
+import { readFileSync } from "fs";
+import { join } from "path";
+import query from "./client";
 
 /**
  * Run database migrations
@@ -8,16 +8,20 @@ import query from './client';
  */
 async function migrate() {
   try {
-    console.log('Running database migrations...');
+    console.log("Running database migrations...");
 
     // Read and execute initial schema migration
-    const migrationPath = join(__dirname, 'migrations', '001_initial_schema.sql');
-    const migrationSQL = readFileSync(migrationPath, 'utf-8');
+    const migrationPath = join(
+      __dirname,
+      "migrations",
+      "001_initial_schema.sql",
+    );
+    const migrationSQL = readFileSync(migrationPath, "utf-8");
 
     await query(migrationSQL);
-    console.log('✅ Migration completed successfully');
+    console.log("✅ Migration completed successfully");
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error("❌ Migration failed:", error);
     process.exit(1);
   }
 }
@@ -35,4 +39,3 @@ if (require.main === module) {
 }
 
 export default migrate;
-

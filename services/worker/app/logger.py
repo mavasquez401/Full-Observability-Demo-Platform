@@ -22,8 +22,8 @@ def add_trace_context(logger, method_name, event_dict):
             span_context = span.get_span_context()
             if span_context.is_valid:
                 # Format trace ID and span ID as hex strings
-                event_dict['trace_id'] = format(span_context.trace_id, '032x')
-                event_dict['span_id'] = format(span_context.span_id, '016x')
+                event_dict["trace_id"] = format(span_context.trace_id, "032x")
+                event_dict["span_id"] = format(span_context.span_id, "016x")
     except Exception:
         pass  # If OTel not available, skip trace context
 
@@ -53,4 +53,3 @@ def configure_logging():
 
 # Configure logging when module is imported
 configure_logging()
-

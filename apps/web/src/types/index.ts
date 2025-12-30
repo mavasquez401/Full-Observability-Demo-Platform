@@ -22,7 +22,7 @@ export interface OrderItem {
 export interface Order {
   id: number;
   user_id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   total_amount: number;
   created_at: string;
   updated_at: string;
